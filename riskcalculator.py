@@ -67,3 +67,95 @@ pipeline = Pipeline(steps=[
     ("preprocess", preprocess),
     ("model", model)
 ])
+
+X_train, X_test, y_train, y_test = train_test_split(
+   X, y, test_size=0.2, random_state=42
+)
+
+
+pipeline.fit(X_train, y_train)
+
+
+preds = pipeline.predict(X_test)
+rmse = np.sqrt(mean_squared_error(y_test, preds))
+mae = mean_absolute_error(y_test, preds)
+r2 = r2_score(y_test, preds)
+
+
+print("\n" + "="*50)
+print("MODEL EVALUATION METRICS")
+print("="*50)
+print(f"RMSE (Root Mean Squared Error): {rmse:.4f}")
+print(f"MAE (Mean Absolute Error): {mae:.4f}")
+print(f"R² Score: {r2:.4f}")
+
+
+try:
+   n_splits = min(5, len(X_train) // 2) if len(X_train) > 10 else 3
+   if n_splits >= 2:
+       cv_scores = cross_val_score(pipeline, X_train, y_train, cv=n_splits, scoring='neg_mean_squared_error')
+       cv_rmse = np.sqrt(-cv_scores)
+       print(f"\nCross-Validation RMSE ({n_splits}-fold): {cv_rmse.mean():.4f} (+/- {cv_rmse.std() * 2:.4f})")
+   else:
+       print("\nDataset too small for cross-validation")
+except Exception as e:
+   print(f"\nCross-validation skipped: {e}")
+fitted_preprocessor = pipeline.named_steps['preprocess']
+try:
+   feature_names = fitted_preprocessor.get_feature_names_out()
+except AttributeError:
+   numeric_feature_names = numeric_cols
+   cat_encoder = fitted_preprocessor.named_transformers_['cat']
+   categorical_feature_names = list(cat_encoder.get_feature_names_out(categorical_cols))
+   feature_names = numeric_feature_names + categorical_feature_names
+
+
+importances = pipeline.named_steps['model'].feature_importances_
+feature_importance_df = pd.DataFrame({
+   'Feature': feature_names,
+   'Importance': importances
+}).sort_values('Importance', ascending=False)
+
+
+print("\n" + "="*50)
+print("TOP 10 MOST IMPORTANT FEATURES")
+print("="*50)
+print(feature_importance_df.head(10).to_string(index=False))
+
+
+print("\n" + "="*50)
+print("GENERATING RISK SCORES")
+print("="*50)
+
+
+raw_predictions = pipeline.predict(X)
+
+
+scaler = MinMaxScaler(feature_range=(0, 100))
+df["Risk_Score"] = scaler.fit_transform(raw_predictions.reshape(-1, 1)).flatten()
+
+
+df["Risk_Score"] = df["Risk_Score"].round(2)
+
+
+print(f"\nRisk Score Statistics:")
+print(f"  Min: {df['Risk_Score'].min():.2f}")
+print(f"  Max: {df['Risk_Score'].max():.2f}")
+print(f"  Mean: {df['Risk_Score'].mean():.2f}")
+print(f"  Median: {df['Risk_Score'].median():.2f}")
+print(f"  Std Dev: {df['Risk_Score'].std():.2f}")
+
+
+print(f"\nRisk Score by Original Risk Level:")
+print(df.groupby('Risk_Level')['Risk_Score'].agg(['mean', 'min', 'max', 'std']).round(2))
+
+
+output_file = "Health_Risk_Dataset_With_Scores.csv"
+df.to_csv(output_file, index=False)
+
+
+print(f"\n{'='*50}")
+print(f"Results saved to: {output_file}")
+print(f"{'='*50}")
+print(f"\nThe dataset now includes a continuous Risk_Score (0-100)")
+print(f"that provides nuanced risk assessment for resource allocation.")
