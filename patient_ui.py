@@ -312,7 +312,7 @@ def calculate_all_risk_scores(df, pipeline, scaler):
 
 def main():
    # Header
-   st.markdown('<h1 class="main-header">🏥 Patient Risk Management System</h1>', unsafe_allow_html=True)
+   st.markdown('<h1 class="main-header">Pulse</h1>', unsafe_allow_html=True)
   
    # Load data and model
    df = load_dataset()
@@ -322,86 +322,62 @@ def main():
    st.sidebar.title("Navigation")
    page = st.sidebar.radio(
        "Choose an option",
-       ["📊 Dashboard", "➕ Add Patient", "❌ Remove Patient", "👤 View Patient", "📋 All Patients"]
+       ["Dashboard", "Add Patient", "Remove Patient", "View Patient", "All Patients"]
    )
   
    # Dashboard
-   if page == "📊 Dashboard":
+   if page == "Dashboard":
        st.header("Dashboard")
       
-       # Check for missing risk scores and offer to calculate them
-       if not df.empty and pipeline is not None and scaler is not None:
-           if 'Risk_Score' not in df.columns:
-               df['Risk_Score'] = None
-          
-           # Convert to numeric to properly count missing values
-           df['Risk_Score'] = pd.to_numeric(df['Risk_Score'], errors='coerce')
-           missing_count = df['Risk_Score'].isna().sum()
-          
-           if missing_count > 0:
-               st.warning(f"⚠️ {missing_count} patients are missing risk scores.")
-               if st.button("🔄 Calculate Risk Scores for All Patients", type="primary"):
-                   with st.spinner("Calculating risk scores..."):
-                       df, calculated = calculate_all_risk_scores(df, pipeline, scaler)
-                       if calculated > 0:
-                           # Save updated dataframe
-                           df.to_csv("Health_Risk_Dataset.csv", index=False)
-                           st.cache_data.clear()
-                           st.success(f"✅ Calculated risk scores for {calculated} patients!")
-                           st.rerun()
-                       else:
-                           st.info("All patients already have risk scores calculated.")
+       # Tableau Dashboard Embed
+       tableau_html = """
+       <div class='tableauPlaceholder' id='viz1763318125151' style='position: relative'>
+           <noscript>
+               <a href='#'>
+                   <img alt='Datathon Dashboard ' src='https://public.tableau.com/static/images/Da/Datathon_Project/DatathonDashboard/1_rss.png' style='border: none' />
+               </a>
+           </noscript>
+           <object class='tableauViz' style='display:none;'>
+               <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+               <param name='embed_code_version' value='3' />
+               <param name='site_root' value='' />
+               <param name='name' value='Datathon_Project&#47;DatathonDashboard' />
+               <param name='tabs' value='no' />
+               <param name='toolbar' value='yes' />
+               <param name='static_image' value='https://public.tableau.com/static/images/Da/Datathon_Project/DatathonDashboard/1.png' />
+               <param name='animate_transition' value='yes' />
+               <param name='display_static_image' value='yes' />
+               <param name='display_spinner' value='yes' />
+               <param name='display_overlay' value='yes' />
+               <param name='display_count' value='yes' />
+               <param name='language' value='en-US' />
+               <param name='filter' value='publish=yes' />
+           </object>
+       </div>
+       <script type='text/javascript'>
+           var divElement = document.getElementById('viz1763318125151');
+           var vizElement = divElement.getElementsByTagName('object')[0];
+           if (divElement.offsetWidth > 800) {
+               vizElement.style.width = '100%';
+               vizElement.style.height = '827px';
+           } else if (divElement.offsetWidth > 500) {
+               vizElement.style.width = '100%';
+               vizElement.style.height = '827px';
+           } else {
+               vizElement.style.width = '100%';
+               vizElement.style.height = '1327px';
+           }
+           var scriptElement = document.createElement('script');
+           scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+           vizElement.parentNode.insertBefore(scriptElement, vizElement);
+       </script>
+       """
       
-       if not df.empty:
-           col1, col2, col3, col4 = st.columns(4)
-          
-           with col1:
-               st.metric("Total Patients", len(df))
-          
-           with col2:
-               if 'Risk_Score' in df.columns:
-                   avg_risk = df['Risk_Score'].mean()
-                   st.metric("Average Risk Score", f"{avg_risk:.1f}")
-               else:
-                   st.metric("Average Risk Score", "N/A")
-          
-           with col3:
-               if 'Risk_Level' in df.columns:
-                   high_risk = len(df[df['Risk_Level'] == 'High'])
-                   st.metric("High Risk Patients", high_risk)
-               else:
-                   st.metric("High Risk Patients", "N/A")
-          
-           with col4:
-               if pipeline is not None:
-                   st.metric("Model Status", "✅ Loaded")
-               else:
-                   st.metric("Model Status", "❌ Not Found")
-          
-           # Recent patients table
-           st.subheader("Recent Patients")
-           # Always include Risk_Score if it exists, and put it early in the display
-           display_cols = ['Patient_ID']
-           if 'Risk_Score' in df.columns:
-               display_cols.append('Risk_Score')
-           display_cols.extend(['Respiratory_Rate', 'Oxygen_Saturation',
-                         'Systolic_BP', 'Heart_Rate', 'Temperature'])
-           if 'Risk_Level' in df.columns:
-               display_cols.append('Risk_Level')
-          
-           available_cols = [col for col in display_cols if col in df.columns]
-          
-           # Format the dataframe for better display
-           display_df = df[available_cols].tail(10).copy()
-           if 'Risk_Score' in display_df.columns:
-               # Format risk score to 2 decimal places
-               display_df['Risk_Score'] = display_df['Risk_Score'].apply(
-                   lambda x: f"{x:.2f}" if pd.notna(x) else "N/A"
-               )
-          
-           st.dataframe(display_df, use_container_width=True)
-       else:
-           st.warning("No patient data found. Please add patients first.")
+       st.components.v1.html(tableau_html, height=850, scrolling=True)
+      
+       # Link to full dashboard
+       st.markdown("---")
+       st.markdown("**View full dashboard:** [Open in Tableau Public](https://public.tableau.com/views/Datathon_Project/DatathonDashboard?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)")
   
    # Add Patient
    elif page == "➕ Add Patient":
