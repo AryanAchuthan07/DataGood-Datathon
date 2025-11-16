@@ -1,5 +1,5 @@
-# DataGood-Datathon 2025
-Datagood Datathon project, hosted by DataGood
+# Pulse
+2025 Datagood Datathon project
 
 ## **Team:**
 Aryan Achuthan, Arvind Krishna Sivakumar, Kabilesh Yuvaraj
@@ -15,3 +15,6 @@ By using a Gradient boosted decision tree in Python using the provided Health_Ri
 Then we create a Tableau visualization where doctors can see which patients are at the most risk. Graphs of their heart rate vs respiratory rate plotted against each other and oxygen saturation vs systolic BP which show the risk for heart disease and hypotension respectively. The doctors can see generalized views of all the patients as well as each individual patients graphs.  
 
 We created a UI in streamlit in the patient_ui.py file that displays this Tableau dashboard and adds features where the doctor can view the dashboard, view all patients, add a patient, and remove a patient.
+
+## **Running Files**
+After downloading all necessary libaries within requirements.txt, run the command below in the terminal. Streamlit will direct you to the UI of Pulse.
