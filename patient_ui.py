@@ -380,7 +380,7 @@ def main():
        st.markdown("**View full dashboard:** [Open in Tableau Public](https://public.tableau.com/views/Datathon_Project/DatathonDashboard?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)")
   
    # Add Patient
-   elif page == "➕ Add Patient":
+   elif page == "Add Patient":
        st.header("Add New Patient")
       
        with st.form("add_patient_form"):
@@ -461,7 +461,7 @@ def main():
                        st.info(f"📊 Calculated Risk Score: {new_patient['Risk_Score']:.2f}")
   
    # Remove Patient
-   elif page == "❌ Remove Patient":
+   elif page == "Remove Patient":
        st.header("Remove Patient")
       
        if df.empty or 'Patient_ID' not in df.columns:
@@ -491,7 +491,7 @@ def main():
                st.write("**Full Details:**")
                st.json(patient.to_dict())
               
-               if st.button("🗑️ Remove Patient", type="primary"):
+               if st.button("Remove Patient", type="primary"):
                    # Remove patient
                    df = df[df['Patient_ID'] != selected_id].reset_index(drop=True)
                    df.to_csv("Health_Risk_Dataset.csv", index=False)
@@ -500,7 +500,7 @@ def main():
                    st.rerun()
   
    # View Patient
-   elif page == "👤 View Patient":
+   elif page == "View Patient":
        st.header("View Patient Details")
       
        if df.empty or 'Patient_ID' not in df.columns:
@@ -563,7 +563,7 @@ def main():
                st.json(patient.to_dict())
   
    # All Patients
-   elif page == "📋 All Patients":
+   elif page == "All Patients":
        st.header("All Patients")
       
        if df.empty:
