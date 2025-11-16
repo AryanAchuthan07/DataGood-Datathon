@@ -18,3 +18,4 @@ We created a UI in streamlit in the patient_ui.py file that displays this Tablea
 
 ## **Running Files**
 After downloading all necessary libaries within requirements.txt, run the command below in the terminal. Streamlit will direct you to the UI of Pulse.
+python -m streamlit run patient_ui.py
